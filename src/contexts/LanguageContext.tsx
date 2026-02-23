@@ -1,0 +1,197 @@
+import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+
+export type Lang = 'en' | 'hi' | 'od';
+
+const translations: Record<Lang, Record<string, string>> = {
+  en: {
+    home: "Home", dashboard: "Dashboard", login: "Login", logout: "Logout", signup: "Sign Up",
+    heroTitle: "Smarter Defence Through Innovation",
+    heroSubtitle: "AI-powered tools to detect threats, identify deepfakes, and protect against cyber attacks — while keeping your privacy intact.",
+    getStarted: "Get Started", learnMore: "Learn More",
+    imageDetection: "AI Image Detection", imageDetectionDesc: "Detect AI-generated images with advanced deep learning analysis",
+    voiceDetection: "Deepfake Voice Detection", voiceDetectionDesc: "Identify synthetic voices and audio deepfakes in real-time",
+    phishingAnalysis: "Phishing Link Analyzer", phishingAnalysisDesc: "Scan URLs for phishing, malware, and social engineering threats",
+    malwareDetection: "File Malware Scanner", malwareDetectionDesc: "Scan files for viruses, trojans, and malicious content",
+    privacyFirst: "Privacy-First Detection", noStorage: "Files Are Not Stored",
+    noSurveillance: "No Surveillance Tracking", userControlled: "User-Controlled Analysis",
+    privacyFirstDesc: "All analysis happens with your privacy as the top priority",
+    noStorageDesc: "Your uploaded files are processed and immediately discarded",
+    noSurveillanceDesc: "We never track your browsing or online activity",
+    userControlledDesc: "You decide what gets analyzed and when",
+    upload: "Upload", analyze: "Analyze", scanning: "Scanning...", results: "Results",
+    dragDrop: "Drag & drop or click to upload",
+    safe: "Safe", suspicious: "Suspicious", dangerous: "Dangerous",
+    low: "Low Risk", medium: "Medium Risk", high: "High Risk",
+    clean: "Clean", malicious: "Malicious",
+    likelyAI: "Likely AI Generated", likelyReal: "Likely Real",
+    threatsDetected: "Threats Detected", scansPerformed: "Scans Performed",
+    safetyScore: "Safety Score", activeAlerts: "Active Alerts",
+    threatOverview: "Threat Overview", recentActivity: "Recent Activity",
+    chatTitle: "AI Safety Assistant", chatPlaceholder: "Ask about cyber safety...",
+    helplineTitle: "Cyber Emergency Helpline",
+    nationalHelpline: "National Cyber Crime Helpline", helplineNumber: "1930",
+    reportOnline: "Report online at cybercrime.gov.in",
+    safetyTips: "Safety Tips",
+    tip1: "Never share OTP or passwords with anyone",
+    tip2: "Verify sender before clicking email links",
+    tip3: "Use strong, unique passwords for each account",
+    tip4: "Enable two-factor authentication everywhere",
+    email: "Email", password: "Password",
+    loginTitle: "Welcome Back", signupTitle: "Create Account",
+    verifyEmail: "Please verify your email to access the dashboard. Check your inbox.",
+    resendVerification: "Resend Verification Email",
+    language: "Language", english: "English", hindi: "हिंदी", odia: "ଓଡ଼ିଆ",
+    overview: "Overview", tools: "Tools",
+    aiProbability: "AI Probability", confidence: "Confidence", verdict: "Verdict",
+    humanVoice: "Human Voice", syntheticVoice: "Synthetic Voice",
+    enterUrl: "Enter URL to analyze", urlPlaceholder: "https://example.com",
+    fileTypes: "Supported: PDF, APK, EXE, DOC",
+    threatScore: "Threat Score", fileSafety: "File Safety",
+    scanComplete: "Scan Complete", noThreats: "No threats detected",
+    pasteUrl: "Paste a URL to check",
+    trustTitle: "Built on Trust & Privacy",
+    trustSubtitle: "Your security is our mission. Every analysis is private, secure, and under your control.",
+    featuresTitle: "Powerful AI Safety Tools",
+    featuresSubtitle: "Comprehensive protection against modern digital threats",
+    copyrightText: "© 2025 TrustLense-AI. All rights reserved.",
+    madeWith: "Made with ❤️ for a safer internet",
+  },
+  hi: {
+    home: "होम", dashboard: "डैशबोर्ड", login: "लॉगिन", logout: "लॉगआउट", signup: "साइन अप",
+    heroTitle: "नवाचार के माध्यम से स्मार्ट रक्षा",
+    heroSubtitle: "खतरों का पता लगाने, डीपफेक की पहचान और साइबर हमलों से बचाव के लिए AI-संचालित उपकरण।",
+    getStarted: "शुरू करें", learnMore: "और जानें",
+    imageDetection: "AI छवि पहचान", imageDetectionDesc: "उन्नत विश्लेषण से AI-जनित छवियों का पता लगाएं",
+    voiceDetection: "डीपफेक आवाज़ पहचान", voiceDetectionDesc: "सिंथेटिक आवाज़ और ऑडियो डीपफेक की पहचान करें",
+    phishingAnalysis: "फ़िशिंग लिंक विश्लेषक", phishingAnalysisDesc: "फ़िशिंग और मैलवेयर खतरों के लिए URL स्कैन करें",
+    malwareDetection: "फ़ाइल मैलवेयर स्कैनर", malwareDetectionDesc: "दुर्भावनापूर्ण सामग्री के लिए फ़ाइलें स्कैन करें",
+    privacyFirst: "गोपनीयता-प्रथम पहचान", noStorage: "फ़ाइलें संग्रहीत नहीं होतीं",
+    noSurveillance: "कोई निगरानी नहीं", userControlled: "उपयोगकर्ता-नियंत्रित विश्लेषण",
+    privacyFirstDesc: "सभी विश्लेषण आपकी गोपनीयता को प्राथमिकता देते हैं",
+    noStorageDesc: "आपकी अपलोड की गई फ़ाइलें तुरंत हटा दी जाती हैं",
+    noSurveillanceDesc: "हम कभी आपकी ब्राउज़िंग ट्रैक नहीं करते",
+    userControlledDesc: "आप तय करें कि क्या विश्लेषण करना है",
+    upload: "अपलोड", analyze: "विश्लेषण", scanning: "स्कैनिंग...", results: "परिणाम",
+    dragDrop: "खींचें और छोड़ें या अपलोड करने के लिए क्लिक करें",
+    safe: "सुरक्षित", suspicious: "संदिग्ध", dangerous: "खतरनाक",
+    low: "कम जोखिम", medium: "मध्यम जोखिम", high: "उच्च जोखिम",
+    clean: "साफ़", malicious: "दुर्भावनापूर्ण",
+    likelyAI: "संभवतः AI जनित", likelyReal: "संभवतः असली",
+    threatsDetected: "खतरे पकड़े गए", scansPerformed: "स्कैन किए गए",
+    safetyScore: "सुरक्षा स्कोर", activeAlerts: "सक्रिय अलर्ट",
+    threatOverview: "खतरा अवलोकन", recentActivity: "हालिया गतिविधि",
+    chatTitle: "AI सुरक्षा सहायक", chatPlaceholder: "साइबर सुरक्षा के बारे में पूछें...",
+    helplineTitle: "साइबर आपातकालीन हेल्पलाइन",
+    nationalHelpline: "राष्ट्रीय साइबर अपराध हेल्पलाइन", helplineNumber: "1930",
+    reportOnline: "cybercrime.gov.in पर ऑनलाइन रिपोर्ट करें",
+    safetyTips: "सुरक्षा सुझाव",
+    tip1: "कभी किसी को OTP या पासवर्ड न बताएं",
+    tip2: "ईमेल लिंक क्लिक करने से पहले भेजने वाले की जांच करें",
+    tip3: "हर खाते के लिए मजबूत, अद्वितीय पासवर्ड उपयोग करें",
+    tip4: "हर जगह दो-कारक प्रमाणीकरण सक्षम करें",
+    email: "ईमेल", password: "पासवर्ड",
+    loginTitle: "वापसी पर स्वागत है", signupTitle: "खाता बनाएं",
+    verifyEmail: "डैशबोर्ड एक्सेस करने के लिए अपना ईमेल सत्यापित करें।",
+    resendVerification: "सत्यापन ईमेल पुनः भेजें",
+    language: "भाषा", english: "English", hindi: "हिंदी", odia: "ଓଡ଼ିଆ",
+    overview: "अवलोकन", tools: "उपकरण",
+    aiProbability: "AI संभावना", confidence: "विश्वास", verdict: "निर्णय",
+    humanVoice: "मानव आवाज़", syntheticVoice: "सिंथेटिक आवाज़",
+    enterUrl: "विश्लेषण के लिए URL दर्ज करें", urlPlaceholder: "https://example.com",
+    fileTypes: "समर्थित: PDF, APK, EXE, DOC",
+    threatScore: "खतरा स्कोर", fileSafety: "फ़ाइल सुरक्षा",
+    scanComplete: "स्कैन पूर्ण", noThreats: "कोई खतरा नहीं",
+    pasteUrl: "जांचने के लिए URL पेस्ट करें",
+    trustTitle: "विश्वास और गोपनीयता पर निर्मित",
+    trustSubtitle: "आपकी सुरक्षा हमारा मिशन है।",
+    featuresTitle: "शक्तिशाली AI सुरक्षा उपकरण",
+    featuresSubtitle: "आधुनिक डिजिटल खतरों से व्यापक सुरक्षा",
+    copyrightText: "© 2025 TrustLense-AI. सर्वाधिकार सुरक्षित।",
+    madeWith: "एक सुरक्षित इंटरनेट के लिए ❤️ से बनाया गया",
+  },
+  od: {
+    home: "ମୂଳପୃଷ୍ଠା", dashboard: "ଡ୍ୟାସବୋର୍ଡ", login: "ଲଗଇନ", logout: "ଲଗଆଉଟ", signup: "ସାଇନ ଅପ",
+    heroTitle: "ଉଦ୍ଭାବନ ମାଧ୍ୟମରେ ସ୍ମାର୍ଟ ରକ୍ଷା",
+    heroSubtitle: "ବିପଦ ଚିହ୍ନଟ, ଡିପଫେକ ପରିଚୟ ଏବଂ ସାଇବର ଆକ୍ରମଣରୁ ସୁରକ୍ଷା ପାଇଁ AI-ଚାଳିତ ଉପକରଣ।",
+    getStarted: "ଆରମ୍ଭ କରନ୍ତୁ", learnMore: "ଅଧିକ ଜାଣନ୍ତୁ",
+    imageDetection: "AI ଛବି ଚିହ୍ନଟ", imageDetectionDesc: "ଉନ୍ନତ ବିଶ୍ଳେଷଣ ସହ AI-ସୃଷ୍ଟ ଛବି ଚିହ୍ନଟ",
+    voiceDetection: "ଡିପଫେକ ସ୍ୱର ଚିହ୍ନଟ", voiceDetectionDesc: "ସିନ୍ଥେଟିକ ସ୍ୱର ଏବଂ ଅଡିଓ ଡିପଫେକ ଚିହ୍ନଟ",
+    phishingAnalysis: "ଫିସିଂ ଲିଙ୍କ ବିଶ୍ଳେଷକ", phishingAnalysisDesc: "ଫିସିଂ ଏବଂ ମାଲୱେୟାର ବିପଦ ପାଇଁ URL ସ୍କାନ",
+    malwareDetection: "ଫାଇଲ ମାଲୱେୟାର ସ୍କାନର", malwareDetectionDesc: "ଦୁର୍ଭାବନାପୂର୍ଣ୍ଣ ବିଷୟ ପାଇଁ ଫାଇଲ ସ୍କାନ",
+    privacyFirst: "ଗୋପନୀୟତା-ପ୍ରଥମ ଚିହ୍ନଟ", noStorage: "ଫାଇଲ ସଂରକ୍ଷିତ ହୁଏ ନାହିଁ",
+    noSurveillance: "କୌଣସି ନଜରଦାରୀ ନାହିଁ", userControlled: "ଉପଯୋଗକର୍ତା-ନିୟନ୍ତ୍ରିତ ବିଶ୍ଳେଷଣ",
+    privacyFirstDesc: "ସମସ୍ତ ବିଶ୍ଳେଷଣ ଆପଣଙ୍କ ଗୋପନୀୟତାକୁ ପ୍ରାଥମିକତା ଦିଏ",
+    noStorageDesc: "ଅପଲୋଡ ହୋଇଥିବା ଫାଇଲ ତୁରନ୍ତ ବିଲୋପ ହୁଏ",
+    noSurveillanceDesc: "ଆମେ ଆପଣଙ୍କ ବ୍ରାଉଜିଂ ଟ୍ରାକ କରୁ ନାହୁଁ",
+    userControlledDesc: "ଆପଣ ନିଷ୍ପତ୍ତି ନିଅନ୍ତୁ କ'ଣ ବିଶ୍ଳେଷଣ କରିବା",
+    upload: "ଅପଲୋଡ", analyze: "ବିଶ୍ଳେଷଣ", scanning: "ସ୍କାନିଂ...", results: "ଫଳାଫଳ",
+    dragDrop: "ଅପଲୋଡ ପାଇଁ ଟାଣି ଛାଡନ୍ତୁ ବା କ୍ଲିକ କରନ୍ତୁ",
+    safe: "ସୁରକ୍ଷିତ", suspicious: "ସନ୍ଦେହଜନକ", dangerous: "ବିପଜ୍ଜନକ",
+    low: "କମ ବିପଦ", medium: "ମଧ୍ୟମ ବିପଦ", high: "ଉଚ୍ଚ ବିପଦ",
+    clean: "ପରିଷ୍କାର", malicious: "ଦୁର୍ଭାବନାପୂର୍ଣ୍ଣ",
+    likelyAI: "ସମ୍ଭବତଃ AI ସୃଷ୍ଟ", likelyReal: "ସମ୍ଭବତଃ ପ୍ରକୃତ",
+    threatsDetected: "ବିପଦ ଧରାପଡିଲା", scansPerformed: "ସ୍କାନ ସମ୍ପାଦିତ",
+    safetyScore: "ସୁରକ୍ଷା ସ୍କୋର", activeAlerts: "ସକ୍ରିୟ ଆଲର୍ଟ",
+    threatOverview: "ବିପଦ ଅବଲୋକନ", recentActivity: "ସାମ୍ପ୍ରତିକ କାର୍ଯ୍ୟକଳାପ",
+    chatTitle: "AI ସୁରକ୍ଷା ସହାୟକ", chatPlaceholder: "ସାଇବର ସୁରକ୍ଷା ବିଷୟରେ ପଚାରନ୍ତୁ...",
+    helplineTitle: "ସାଇବର ଜରୁରୀ ହେଲ୍ପଲାଇନ",
+    nationalHelpline: "ଜାତୀୟ ସାଇବର ଅପରାଧ ହେଲ୍ପଲାଇନ", helplineNumber: "1930",
+    reportOnline: "cybercrime.gov.in ରେ ଅନଲାଇନ ରିପୋର୍ଟ କରନ୍ତୁ",
+    safetyTips: "ସୁରକ୍ଷା ସୁଝାବ",
+    tip1: "କାହାରିକୁ OTP ବା ପାସୱାର୍ଡ ଦିଅନ୍ତୁ ନାହିଁ",
+    tip2: "ଇମେଲ ଲିଙ୍କ କ୍ଲିକ ପୂର୍ବରୁ ପ୍ରେରକ ଯାଞ୍ଚ କରନ୍ତୁ",
+    tip3: "ପ୍ରତ୍ୟେକ ଆକାଉଣ୍ଟ ପାଇଁ ଶକ୍ତିଶାଳୀ ପାସୱାର୍ଡ ବ୍ୟବହାର କରନ୍ତୁ",
+    tip4: "ସବୁଠାରେ ଦୁଇ-ଫ୍ୟାକ୍ଟର ପ୍ରମାଣୀକରଣ ସକ୍ଷମ କରନ୍ତୁ",
+    email: "ଇମେଲ", password: "ପାସୱାର୍ଡ",
+    loginTitle: "ସ୍ୱାଗତ", signupTitle: "ଆକାଉଣ୍ଟ ତିଆରି",
+    verifyEmail: "ଡ୍ୟାସବୋର୍ଡ ଆକ୍ସେସ ପାଇଁ ଇମେଲ ଯାଞ୍ଚ କରନ୍ତୁ।",
+    resendVerification: "ସତ୍ୟାପନ ଇମେଲ ପୁଣି ପଠାନ୍ତୁ",
+    language: "ଭାଷା", english: "English", hindi: "हिंदी", odia: "ଓଡ଼ିଆ",
+    overview: "ଅବଲୋକନ", tools: "ଉପକରଣ",
+    aiProbability: "AI ସମ୍ଭାବନା", confidence: "ବିଶ୍ୱାସ", verdict: "ରାୟ",
+    humanVoice: "ମାନବ ସ୍ୱର", syntheticVoice: "ସିନ୍ଥେଟିକ ସ୍ୱର",
+    enterUrl: "ବିଶ୍ଳେଷଣ ପାଇଁ URL ଦିଅନ୍ତୁ", urlPlaceholder: "https://example.com",
+    fileTypes: "ସମର୍ଥିତ: PDF, APK, EXE, DOC",
+    threatScore: "ବିପଦ ସ୍କୋର", fileSafety: "ଫାଇଲ ସୁରକ୍ଷା",
+    scanComplete: "ସ୍କାନ ସମ୍ପୂର୍ଣ୍ଣ", noThreats: "କୌଣସି ବିପଦ ନାହିଁ",
+    pasteUrl: "ଯାଞ୍ଚ ପାଇଁ URL ପେଷ୍ଟ କରନ୍ତୁ",
+    trustTitle: "ବିଶ୍ୱାସ ଏବଂ ଗୋପନୀୟତା ଉପରେ ନିର୍ମିତ",
+    trustSubtitle: "ଆପଣଙ୍କ ସୁରକ୍ଷା ଆମର ମିଶନ।",
+    featuresTitle: "ଶକ୍ତିଶାଳୀ AI ସୁରକ୍ଷା ଉପକରଣ",
+    featuresSubtitle: "ଆଧୁନିକ ଡିଜିଟାଲ ବିପଦରୁ ବ୍ୟାପକ ସୁରକ୍ଷା",
+    copyrightText: "© 2025 TrustLense-AI। ସମସ୍ତ ଅଧିକାର ସଂରକ୍ଷିତ।",
+    madeWith: "ଏକ ସୁରକ୍ଷିତ ଇଣ୍ଟରନେଟ ପାଇଁ ❤️ ରେ ନିର୍ମିତ",
+  },
+};
+
+interface LanguageContextType {
+  lang: Lang;
+  setLang: (lang: Lang) => void;
+  t: (key: string) => string;
+}
+
+const LanguageContext = createContext<LanguageContextType>({} as LanguageContextType);
+
+export const useLanguage = () => useContext(LanguageContext);
+
+export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const [lang, setLangState] = useState<Lang>(() => {
+    const saved = localStorage.getItem('trustlense-lang');
+    return (saved as Lang) || 'en';
+  });
+
+  const setLang = useCallback((l: Lang) => {
+    setLangState(l);
+    localStorage.setItem('trustlense-lang', l);
+  }, []);
+
+  const t = useCallback((key: string) => {
+    return translations[lang][key] || translations.en[key] || key;
+  }, [lang]);
+
+  return (
+    <LanguageContext.Provider value={{ lang, setLang, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
