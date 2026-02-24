@@ -6,21 +6,39 @@ export default async function handler(req, res) {
   try {
     const { url } = req.body;
 
-    if (!url) {
-      return res.status(400).json({ error: "No URL provided" });
-    }
+    const GOOGLE_API_KEY = process.env.GOOGLE_SAFE_BROWSING_KEY;
 
-    // Simple AI phishing simulation
-    const suspiciousWords = ["login", "verify", "bank", "free", "crypto"];
-
-    const isPhishing = suspiciousWords.some(word =>
-      url.toLowerCase().includes(word)
+    const response = await fetch(
+      `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${GOOGLE_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client: {
+            clientId: "trustlens",
+            clientVersion: "1.0",
+          },
+          threatInfo: {
+            threatTypes: [
+              "MALWARE",
+              "SOCIAL_ENGINEERING",
+              "UNWANTED_SOFTWARE",
+            ],
+            platformTypes: ["ANY_PLATFORM"],
+            threatEntryTypes: ["URL"],
+            threatEntries: [{ url }],
+          },
+        }),
+      }
     );
 
+    const data = await response.json();
+
     res.json({
-      unsafe: isPhishing,
-      matches: isPhishing ? ["SOCIAL_ENGINEERING"] : [],
-      source: "vercel-simulated"
+      unsafe: !!data.matches,
+      matches: data.matches || [],
     });
 
   } catch (err) {
