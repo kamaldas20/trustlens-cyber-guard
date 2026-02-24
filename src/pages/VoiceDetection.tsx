@@ -4,6 +4,7 @@ import { Mic, Upload, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
+import { detectVoiceAI } from '../utils/resembleVoice';
 
 const VoiceDetection = () => {
   const { t } = useLanguage();
@@ -23,25 +24,36 @@ const VoiceDetection = () => {
   };
 
   const analyze = async () => {
-    if (!file) return;
-    setScanning(true);
-    setProgress(0);
-    setResult(null);
+  if (!file) return;
 
-    for (let i = 0; i <= 100; i += 2) {
-      await new Promise((r) => setTimeout(r, 50));
-      setProgress(i);
-    }
+  setScanning(true);
+  setProgress(0);
+  setResult(null);
 
-    const aiProb = Math.random() * 70 + 15;
+  try {
+    const apiResult = await detectVoiceAI(file);
+    console.log("Resemble:", apiResult);
+
+    // REAL RESPONSE PARSE
+    const aiScore = apiResult?.deepfake_probability ?? 0;
+    const aiProb = Math.round(aiScore * 100);
+
     setResult({
-      aiProbability: Math.round(aiProb),
-      verdict: aiProb > 60 ? 'synthetic' : 'human',
-      risk: aiProb > 70 ? 'high' : aiProb > 40 ? 'medium' : 'low',
+      aiProbability: aiProb,
+      verdict: aiProb > 60 ? "synthetic" : "human",
+      risk:
+        aiProb > 75 ? "high" :
+        aiProb > 40 ? "medium" :
+        "low",
     });
-    setScanning(false);
-  };
 
+  } catch (err) {
+    console.error(err);
+    alert("Voice AI scan failed");
+  }
+
+  setScanning(false);
+};
   const riskConfig = {
     low: { label: t('low'), color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/30' },
     medium: { label: t('medium'), color: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/30' },

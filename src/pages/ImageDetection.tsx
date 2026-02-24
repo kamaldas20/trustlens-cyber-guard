@@ -4,6 +4,7 @@ import { Image, Upload, CheckCircle, AlertTriangle, XCircle } from 'lucide-react
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
+import { detectAIImage } from '../utils/sightengine';
 
 const ImageDetection = () => {
   const { t } = useLanguage();
@@ -45,13 +46,35 @@ const ImageDetection = () => {
     }
 
     // Simulated result (real API integration needs backend/edge function)
-    const aiProb = Math.random() * 60 + 30;
-    setResult({
-      aiProbability: Math.round(aiProb),
-      verdict: aiProb > 70 ? 'likely_ai' : aiProb > 45 ? 'suspicious' : 'likely_real',
-      confidence: Math.round(Math.random() * 15 + 80),
-    });
-    setScanning(false);
+    try {
+  const apiResult = await detectAIImage(file);
+
+  console.log("Sightengine:", apiResult);
+
+  // Sightengine AI detection field
+  const aiScore =
+  apiResult?.type?.ai_generated ??
+  apiResult?.ai_generated ??
+  apiResult?.classification?.ai_generated ??
+  0;
+
+  const aiProb = Math.round(aiScore * 100);
+
+  setResult({
+    aiProbability: aiProb,
+    verdict:
+      aiProb > 70 ? 'likely_ai' :
+      aiProb > 45 ? 'suspicious' :
+      'likely_real',
+    confidence: 90,
+  });
+
+} catch (err) {
+  console.error(err);
+  alert("AI scan failed");
+}
+
+setScanning(false);
   };
 
   const verdictConfig = {

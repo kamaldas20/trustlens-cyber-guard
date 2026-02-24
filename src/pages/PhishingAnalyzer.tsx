@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
+import { checkPhishingLink } from "../utils/googlePhishing";
+
 
 const PhishingAnalyzer = () => {
   const { t } = useLanguage();
@@ -16,31 +18,30 @@ const PhishingAnalyzer = () => {
     threats: string[];
   } | null>(null);
 
-  const analyze = async () => {
-    if (!url.trim()) return;
-    setScanning(true);
-    setProgress(0);
-    setResult(null);
+ const analyze = async () => {
+  if (!url) return;
 
-    for (let i = 0; i <= 100; i += 3) {
-      await new Promise((r) => setTimeout(r, 30));
-      setProgress(i);
-    }
+  setScanning(true);
+  setResult(null);
 
-    // Simulated result
-    const rand = Math.random();
-    const verdict = rand > 0.6 ? 'safe' : rand > 0.3 ? 'suspicious' : 'dangerous';
-    const threats =
-      verdict === 'dangerous'
-        ? ['SOCIAL_ENGINEERING', 'MALWARE']
-        : verdict === 'suspicious'
-        ? ['SOCIAL_ENGINEERING']
-        : [];
+  try {
+    const data = await checkPhishingLink(url);
 
-    setResult({ verdict, threats });
-    setScanning(false);
-  };
+    const isUnsafe = data.unsafe;
+    const threats = data.matches?.map(m => m.threatType) || [];
 
+    setResult({
+      verdict: isUnsafe ? "dangerous" : "safe",
+      threats: threats,
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert("Phishing scan failed");
+  }
+
+  setScanning(false);
+};
   const verdictConfig = {
     safe: {
       label: t('safe'),
