@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   LayoutDashboard, Image, Mic, Link2, FileSearch, LogOut, Shield,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, ShieldAlert, MessageSquareWarning,
 } from 'lucide-react';
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
@@ -20,6 +20,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     { to: '/dashboard/voice', icon: Mic, label: t('voiceDetection') },
     { to: '/dashboard/phishing', icon: Link2, label: t('phishingAnalysis') },
     { to: '/dashboard/malware', icon: FileSearch, label: t('malwareDetection') },
+    { to: '/dashboard/fake-loan', icon: ShieldAlert, label: t('fakeLoanDetector') },
+    { to: '/dashboard/fake-sms', icon: MessageSquareWarning, label: t('fakeSmsDetector') },
   ];
 
   return (

@@ -16,6 +16,8 @@ import ImageDetection from "./pages/ImageDetection";
 import VoiceDetection from "./pages/VoiceDetection";
 import PhishingAnalyzer from "./pages/PhishingAnalyzer";
 import MalwareScanner from "./pages/MalwareScanner";
+import FakeLoanDetector from "./pages/FakeLoanDetector";
+import FakeSmsDetector from "./pages/FakeSmsDetector";
 import NotFound from "./pages/NotFound";
 import { ReactNode } from "react";
 
@@ -82,6 +84,22 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <DashboardLayout><MalwareScanner /></DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/fake-loan"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout><FakeLoanDetector /></DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/fake-sms"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout><FakeSmsDetector /></DashboardLayout>
             </ProtectedRoute>
           }
         />
