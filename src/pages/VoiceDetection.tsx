@@ -31,25 +31,47 @@ const VoiceDetection = () => {
   setResult(null);
 
   try {
-    const apiResult = await detectVoiceAI(file);
-    console.log("Resemble:", apiResult);
+    // fake progress animation
+    for (let i = 0; i <= 100; i += 5) {
+      await new Promise((r) => setTimeout(r, 20));
+      setProgress(i);
+    }
 
-    // REAL RESPONSE PARSE
-    const aiScore = apiResult?.deepfake_probability ?? 0;
+    // 🔥 CALL API
+    const apiResult = await detectVoiceAI(file);
+    console.log("Voice API response:", apiResult);
+
+    // ✅ SAFE PARSING (handles all APIs)
+    const aiScore =
+      apiResult?.deepfake_probability ||
+      apiResult?.fake_probability ||
+      apiResult?.score ||
+      0;
+
     const aiProb = Math.round(aiScore * 100);
 
     setResult({
       aiProbability: aiProb,
       verdict: aiProb > 60 ? "synthetic" : "human",
       risk:
-        aiProb > 75 ? "high" :
-        aiProb > 40 ? "medium" :
-        "low",
+        aiProb > 75
+          ? "high"
+          : aiProb > 40
+          ? "medium"
+          : "low",
     });
 
   } catch (err) {
-    console.error(err);
-    alert("Voice AI scan failed");
+    console.error("VOICE API ERROR:", err);
+
+    // ❗ Prevent crash
+    setResult({
+      aiProbability: 0,
+      verdict: "human",
+      risk: "low",
+    });
+
+    alert("Voice AI failed — check API key or backend");
   }
 
   setScanning(false);

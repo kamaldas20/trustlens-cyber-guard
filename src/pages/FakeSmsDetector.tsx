@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { addScanRecord } from '@/lib/scanHistory';
 
+
 const SCAM_PATTERNS: { pattern: RegExp; weight: number; reason: string }[] = [
   { pattern: /your.*account.*blocked|account.*suspend/i, weight: 3, reason: 'Account suspension threat' },
   { pattern: /click.*link|tap.*here|visit.*now/i, weight: 2, reason: 'Urgent click-bait language' },
